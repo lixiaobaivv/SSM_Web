@@ -188,4 +188,11 @@
         SELECT COUNT(isWork) isWork FROM tb_students WHERE isWork=1
     </select>
 
+    <insert id="updateEmail" parameterType="studentCustom">
+        UPDATE tb_students SET
+        <if test="stuMail!='' and stuMail!=null">
+            stuMail=#{stuMail}, stuMailState= #{stuMailState}
+        </if>
+        WHERE id = #{id}
+    </insert>
 </mapper>

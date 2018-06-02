@@ -26,7 +26,10 @@ public interface StudentDao {
     boolean deleteStudentCustom(Integer id) throws Exception;
 
     //返回返回影响行数 0即代表false true 非 0
-    boolean updateStudentCustom(StudentCustom StudentCustomCustom) throws Exception;
+    boolean updateStudentCustom(StudentCustom studentCustom) throws Exception;
+
+    // 邮箱验证
+    boolean updateEmail(StudentCustom studentCustom) throws Exception;
 
     // 统计学生数
     Integer countStudent() throws Exception;
