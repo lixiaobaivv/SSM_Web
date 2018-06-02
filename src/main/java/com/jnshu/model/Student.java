@@ -17,6 +17,7 @@ public class Student implements Serializable {
     private String stuName;
     private String stuQq;
     private String stuMail;
+    private String stuMailState;
     private Integer stuTelephone;
     private Integer stuProfession;
     private Long join_date;
@@ -41,6 +42,7 @@ public class Student implements Serializable {
                 ", stuName='" + stuName + '\'' +
                 ", stuQq='" + stuQq + '\'' +
                 ", stuMail='" + stuMail + '\'' +
+                ", stuMailState='" + stuMailState + '\'' +
                 ", stuTelephone=" + stuTelephone +
                 ", stuProfession=" + stuProfession +
                 ", join_date=" + join_date +
@@ -58,6 +60,14 @@ public class Student implements Serializable {
                 ", create_by='" + create_by + '\'' +
                 ", update_by='" + update_by + '\'' +
                 '}';
+    }
+
+    public String getStuMailState() {
+        return stuMailState;
+    }
+
+    public void setStuMailState(String stuMailState) {
+        this.stuMailState = stuMailState;
     }
 
     public String getStuMail() {
