@@ -15,22 +15,21 @@ import java.util.Set;
  * @create: 2018-05-29 01:26
  **/
 
-public class RlSMS {
-    private String AccountSid;
-    private String AccountToken;
+public class SendSMSSDK {
+    private String accountSid;
+    private String accountToken;
     private String Rand_Code = RandNum.getRandLength(4);
+    private String appId;
 
     @Autowired
     MemCachedClient memCachedClient;
 
-    RlSMS(String AccountSid, String AccountToken){
-        this.AccountSid = AccountSid;
-        this.AccountToken = AccountToken;
+    SendSMSSDK(String accountSid, String accountToken, String AppId){
+        this.accountSid = accountSid;
+        this.accountToken = accountToken;
+        this.appId = AppId;
     }
 
-    public String getRand_Code() {
-        return Rand_Code;
-    }
 
     public boolean testSMS(String telephone_Number, String SessionId) {
         HashMap<String, Object> result = null;
@@ -43,9 +42,14 @@ public class RlSMS {
         // restAPI.init("app.cloopen.com", "8883");
 
         /* 初始化主账号和主令牌 ACOUNT SID和AUTH TOKEN在登陆官网后，在“应用-管理控制台”中查看开发者主账号获取 */
-        restAPI.setAccount(AccountSid, AccountToken);
+        try {
+            restAPI.setAccount(accountSid, accountToken);
+        } catch (Exception e){
+            return false;
+        }
+
         /* 初始化应用ID 应用ID的获取：登陆官网，在“应用-应用列表”，点击应用名称，看应用详情获取APP ID */
-        restAPI.setAppId("8a216da86391c1fa0163a705b75205de");
+        restAPI.setAppId(appId);
 
         /* 发送短信 */
         //*第一个参数:是要发送的手机号码，可以用逗号分隔，一次最多支持100个手机号                          *
