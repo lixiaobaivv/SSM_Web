@@ -3,6 +3,7 @@ package com.jnshu.controller;
 import com.jnshu.model.StudentCustom;
 import com.jnshu.model.StudentQV;
 import com.jnshu.service.ServiceDao;
+import com.jnshu.tools.SendMailSDK;
 import com.whalin.MemCached.MemCachedClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +31,8 @@ public class ControllerProtect {
     MemCachedClient memCachedClient;
     @Autowired
     ServiceDao serviceDao;
+    @Autowired
+    SendMailSDK sendMailSDK;
 
     // 搜索
     @RequestMapping(value = "/students", method = {RequestMethod.GET,RequestMethod.POST,RequestMethod.PUT})
@@ -90,5 +93,25 @@ public class ControllerProtect {
     @ResponseBody
     public Boolean delete(@PathVariable Integer id ) throws Exception {
         return serviceDao.deleteStudent(id);
+    }
+
+    // 上传图片到七牛
+
+
+    // 邮箱设置
+    @RequestMapping(value = "/sendMail", method = RequestMethod.GET)
+    @ResponseBody
+    public Boolean sendMail(HttpServletRequest httpServletRequest, StudentCustom studentCustom){
+        String httpUrl = httpServletRequest.getRequestURL().toString();
+        logger.debug("访问项目网址为: " + httpUrl);
+        studentCustom.setStuMail("xiaoweiba1028@gmail.com");
+        return sendMailSDK.sendMail(httpUrl, studentCustom);
+    }
+
+    // 效验
+    @RequestMapping(value = "/sendMail/{verifyCode}", method = RequestMethod.GET)
+    @ResponseBody
+    public String verifyCode(@PathVariable(value = "verifyCode") String verifyCode){
+        return verifyCode;
     }
 }
