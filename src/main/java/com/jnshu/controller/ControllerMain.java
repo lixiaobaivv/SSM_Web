@@ -4,7 +4,7 @@ import com.jnshu.model.*;
 import com.jnshu.service.ServiceDao;
 import com.jnshu.tools.DESUtil;
 import com.jnshu.tools.MD5Util;
-import com.jnshu.tools.RlSMS;
+import com.jnshu.tools.SendSMSSDK;
 import com.whalin.MemCached.MemCachedClient;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -37,7 +36,7 @@ public class ControllerMain {
     @Autowired
     MemCachedClient memCachedClient;
     @Autowired
-    RlSMS rlSMS;
+    SendSMSSDK rlSMS;
 
     // private String codeValidate;
 
@@ -132,4 +131,5 @@ public class ControllerMain {
         // logger.debug("rlSMS.getRand_Code():" + codeValidate);
         return flag;
     }
+
 }
