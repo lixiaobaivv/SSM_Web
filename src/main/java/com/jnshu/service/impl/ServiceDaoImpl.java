@@ -97,6 +97,11 @@ public class ServiceDaoImpl implements ServiceDao {
     }
 
     @Override
+    public boolean updateEmail(StudentCustom studentCustom) throws Exception {
+        return studentDao.updateEmail(studentCustom);
+    }
+
+    @Override
     public Integer countStudent() throws Exception {
         return studentDao.countStudent();
     }
