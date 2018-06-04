@@ -22,8 +22,10 @@ public interface ServiceDao {
     boolean deleteStudent(Integer id) throws Exception;
     // 更新学员信息
     boolean updateStudent(StudentCustom studentCustom) throws Exception;
-    // 邮箱验证
+    // 邮箱验证更新
     boolean updateEmail(StudentCustom studentCustom) throws Exception;
+    // 手机号验证更新
+    boolean updateTelephone(Integer id, String telePhone) throws Exception;
     // 统计学员人数
     Integer countStudent() throws Exception;
     // 统计工作人数

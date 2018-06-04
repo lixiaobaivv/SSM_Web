@@ -98,7 +98,24 @@ public class ServiceDaoImpl implements ServiceDao {
 
     @Override
     public boolean updateEmail(StudentCustom studentCustom) throws Exception {
-        return studentDao.updateEmail(studentCustom);
+        if (studentDao.updateEmail(studentCustom)) {
+            memCachedClient.delete("student" + studentCustom.getId());
+            memCachedClient.delete("studentAll");
+            logger.debug("studentId  studentAll 缓存已清空");
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean updateTelephone(Integer id, String telePhone) throws Exception {
+        if (studentDao.updateTelephone(id, telePhone)) {
+            memCachedClient.delete("student" + id);
+            memCachedClient.delete("studentAll");
+            logger.debug("studentId  studentAll 缓存已清空");
+            return true;
+        }
+        return false;
     }
 
     @Override
