@@ -2,6 +2,8 @@ package com.jnshu.tools;
 
 import com.cloopen.rest.sdk.CCPRestSmsSDK;
 import com.whalin.MemCached.MemCachedClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
@@ -16,9 +18,10 @@ import java.util.Set;
  **/
 
 public class SendSMSSDK {
+    private static Logger logger = LoggerFactory.getLogger(SendSMSSDK.class);
     private String accountSid;
     private String accountToken;
-    private String Rand_Code = RandNum.getRandLength(4);
+    private String Rand_Code;
     private String appId;
 
     @Autowired
@@ -32,6 +35,8 @@ public class SendSMSSDK {
 
 
     public boolean testSMS(String telephone_Number, String SessionId) {
+        Rand_Code = RandNum.getRandLength(4);
+        logger.debug("Rand_Code: " + Rand_Code);
         HashMap<String, Object> result = null;
         // 初始化SDK
         CCPRestSmsSDK restAPI = new CCPRestSmsSDK();
@@ -58,24 +63,24 @@ public class SendSMSSDK {
         //*第三个参数是要替换的内容数组。
         /* 给17050071261按照官网模板 1 发送验证码 6543 1分钟后失效 */
         result = restAPI.sendTemplateSMS(telephone_Number, "1", new String[]{Rand_Code,"1"});
-        memCachedClient.set("code"+SessionId, Rand_Code, new Date(1000*60));
-        System.out.println("缓存值: " + memCachedClient.get("code" + SessionId) + "key: " + "code" + SessionId);
+        memCachedClient.set(Rand_Code + SessionId, telephone_Number, new Date(1000*60));
+        logger.debug("缓存值: " + memCachedClient.get(Rand_Code + SessionId) + " key: " + Rand_Code + SessionId);
 
         // System.out.println(Rand_Code);
         /* 输出发送返回信息 */
-        System.out.println("SDKTestGetSubAccounts result=" + result);
+        logger.debug("SDKTestGetSubAccounts result=" + result);
         if("000000".equals(result.get("statusCode"))){
             //正常返回输出data包体信息（map）
             HashMap<String,Object> data = (HashMap<String, Object>) result.get("data");
             Set<String> keySet = data.keySet();
             for(String key:keySet){
                 Object object = data.get(key);
-                System.out.println(key +" = "+object);
+                logger.debug(key +" = "+object);
             }
             return true;
         }else{
             //异常返回输出错误码和错误信息
-            System.out.println("错误码=" + result.get("statusCode") +" 错误信息= "+result.get("statusMsg"));
+            logger.debug("错误码=" + result.get("statusCode") +" 错误信息= "+result.get("statusMsg"));
             return false;
         }
     }
