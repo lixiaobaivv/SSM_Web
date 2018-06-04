@@ -31,6 +31,9 @@ public interface StudentDao {
     // 邮箱验证
     boolean updateEmail(StudentCustom studentCustom) throws Exception;
 
+    // 手机号验证更新
+    boolean updateTelephone(Integer id, String telePhone) throws Exception;
+
     // 统计学生数
     Integer countStudent() throws Exception;
 

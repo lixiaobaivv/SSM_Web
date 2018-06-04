@@ -195,4 +195,8 @@
         </if>
         WHERE id = #{id}
     </insert>
+    <insert id="updateTelephone" >
+        UPDATE tb_students SET stuTelephone=#{1}
+        WHERE id = #{0}
+    </insert>
 </mapper>
