@@ -50,14 +50,14 @@ public class SendMailSDK {
     // 收件邮箱
     // private String sendTo;
     // 随机数验证
-    private String randInt = RandNum.getRandLength(12);
+    private String randInt;
 
     /* 设置默认值 */
     // 邮件主体
     private String subject = "学生管理系统邮箱验证";
     // 邮件内容
     private String sendBodyBegin = "<html><H1><a href=\"";
-    private String sendBodyEnd = "\">点击验证邮箱</a></H1></html>";
+    private String sendBodyEnd = "\">点击验证邮箱,五分钟后失效</a></H1></html>";
     // 发件人名称
     private String fromName = "小尾巴";
 
@@ -77,24 +77,24 @@ public class SendMailSDK {
     // 外部调用发送方法
     // 只提供发送邮箱
     public boolean sendMail(String httpUrl, StudentCustom studentCustom) {
-        // 拼接验证url httpUrl 当前项目的根目录
-        String sendBody = sendBodyBegin + httpUrl + "/" + randInt + sendBodyEnd;
-        logger.debug("拼接发送内容: " + sendBody);
-        return sendMailReal(studentCustom, subject, sendBody, fromName);
+
+        return sendMailReal(studentCustom, subject, httpUrl, fromName);
     }
 
     public boolean sendMail(String httpUrl, StudentCustom studentCustom, String toSubject) {
-        String sendBody = sendBodyBegin + httpUrl + "/verify/" + randInt + sendBodyEnd;
-        return sendMailReal(studentCustom, toSubject, sendBody, fromName);
+        return sendMailReal(studentCustom, toSubject, httpUrl, fromName);
     }
 
     public boolean sendMail(String httpUrl, StudentCustom studentCustom, String toSubject, String fromName) {
-        String sendBody = sendBodyBegin + httpUrl + "/verify/" + randInt + sendBodyEnd;
-        return sendMailReal(studentCustom, toSubject, sendBody, fromName);
+        return sendMailReal(studentCustom, toSubject, httpUrl, fromName);
     }
 
     // 发送方法
-    private boolean sendMailReal(StudentCustom studentCustom, String subject, String sendBody, String fromName) {
+    private boolean sendMailReal(StudentCustom studentCustom, String subject, String httpUrl, String fromName) {
+        // 拼接验证url httpUrl 当前项目的根目录
+        randInt = RandNum.getRandLength(12);
+        String sendBody = sendBodyBegin + httpUrl + randInt + sendBodyEnd;
+        logger.debug("拼接发送内容: " + sendBody);
         // 设置发信内容
         params = new ArrayList<NameValuePair>();
         params.add(new BasicNameValuePair("apiUser", apiUser));
@@ -122,10 +122,16 @@ public class SendMailSDK {
             // 判断请求是否发送成功
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                 // 判断邮件是否发送成功
-                if ((Integer)jsonObject.get("statusCode") == 200){
-                    // 发送成功将随机验证码存入缓存 5分钟后过期, 通过随机码取出对应用户id
+                if ((Integer)jsonObject.get("statusCode") == 40005){
+                    // 发送成功将随机验证码存入缓存 5分钟后过期, 通过随机码取出对应用户数据
                     logger.debug("随机验证码:" + randInt);
-                    memCachedClient.set(randInt, studentCustom.getId(), new Date(1000 * 60 * 5));
+
+                    // 写入缓存等待验证, 缓存命中再写入数据库 邮箱账号状态只在用户注册时默认为未激活.
+                    studentCustom.setStuMailState(1);
+
+                    logger.debug("邮箱缓存存入时: " + studentCustom.toString());
+                    memCachedClient.set(randInt, studentCustom, new Date(1000 * 60 * 5));
+
                     // 正常处理
                     logger.debug("发送成功~");
                     logger.debug("返回信息: " + jsonObject.toJSONString());
@@ -151,6 +157,10 @@ public class SendMailSDK {
         } catch (IOException e) {
             e.printStackTrace();
             logger.debug("EntityUtils.toString(response.getEntity()) 转换失败");
+            return false;
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.debug("数据库写入失败");
             return false;
         }
     }
