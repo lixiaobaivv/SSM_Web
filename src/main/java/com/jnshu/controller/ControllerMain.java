@@ -2,9 +2,7 @@ package com.jnshu.controller;
 
 import com.jnshu.model.*;
 import com.jnshu.service.ServiceDao;
-import com.jnshu.tools.DESUtil;
-import com.jnshu.tools.MD5Util;
-import com.jnshu.tools.SendSMSSDK;
+import com.jnshu.tools.*;
 import com.whalin.MemCached.MemCachedClient;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
@@ -21,6 +19,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.net.URLEncoder;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -38,6 +37,10 @@ public class ControllerMain {
     MemCachedClient memCachedClient;
     @Autowired
     SendSMSSDK rlSMS;
+    @Autowired
+    QiniuyunOSSAPI updateFileAPI;
+    @Autowired
+    SdkTools sdkTools;
 
     // private String codeValidate;
 
@@ -124,12 +127,16 @@ public class ControllerMain {
     @RequestMapping(value = "/SMS", method = RequestMethod.POST)
     @ResponseBody
     public Boolean SMS(String telePhone, HttpServletRequest httpServletRequest){
-        String Session = httpServletRequest.getSession().getId();
-        logger.debug("接收号码" + telePhone);
-        boolean flag = rlSMS.testSMS(telePhone, Session);
-        // this.codeValidate = rlSMS.getRand_Code();
-        logger.debug("session" + Session);
-        // logger.debug("rlSMS.getRand_Code():" + codeValidate);
+        boolean flag = false;
+        // 判断是否在60秒内发送过短信
+        if(memCachedClient.get(telePhone)==null){
+            String Session = httpServletRequest.getSession().getId();
+            flag = rlSMS.testSMS(telePhone, Session);
+            if (flag){
+                // 短信发送成功设置60秒缓存
+                memCachedClient.set(telePhone, "ver", new Date(1000*60));
+            }
+        }
         return flag;
     }
 
@@ -156,5 +163,12 @@ public class ControllerMain {
         }
         model.addAttribute("message", "验证码无效");
         return "message";
+    }
+
+    // OSS文件迁移
+    @RequestMapping(value = "/test", method = RequestMethod.GET)
+    @ResponseBody
+    public Boolean test(){
+        return sdkTools.qiNiuFileToAliyun("image", "http://p9kpdscob.bkt.clouddn.com/");
     }
 }
