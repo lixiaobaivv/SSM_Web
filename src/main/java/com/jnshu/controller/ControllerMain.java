@@ -12,9 +12,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -40,7 +43,7 @@ public class ControllerMain {
 
     // private String codeValidate;
 
-    @RequestMapping(value = "/home", method = RequestMethod.GET)
+    @RequestMapping(value = "/", method = RequestMethod.GET)
     public String home(Model model, StudentQV studentQV) throws Exception {
         StudentCustom studentCustom = new StudentCustom();
         studentCustom.setIsSuper(1);
@@ -67,7 +70,7 @@ public class ControllerMain {
     public String validate(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, UserAuth userAuth, String code) throws Exception {
         logger.debug("code: " + code);
         // 判断code
-        if(!memCachedClient.get("code"+httpServletRequest.getSession().getId()).equals(code)){
+        if(memCachedClient.get(code + httpServletRequest.getSession().getId())==null){
             logger.debug("code 验证失败");
             return "redirect:/admin/login";
         }
@@ -132,4 +135,28 @@ public class ControllerMain {
         return flag;
     }
 
+    // 效验 效验邮箱不需要登陆验证
+    @RequestMapping(value = "/verifyMail/{verifyCode}", method = RequestMethod.GET)
+    public String verifyCode(@PathVariable(value = "verifyCode") String verifyCode, Model model){
+        StudentCustom studentCustom = (StudentCustom) memCachedClient.get(verifyCode);
+        if (studentCustom != null ){
+            logger.debug("studentCustom 邮箱验证:" + studentCustom.toString());
+            // 该验证码请求只要被接收到就失效
+            memCachedClient.delete(verifyCode);
+            // 改变邮箱状态
+            studentCustom.setStuMailState(1);
+            try {
+                // 存入数据库 判断是否存入成功
+                if(serviceDao.updateEmail(studentCustom)){
+                    model.addAttribute("message", "验证成功");
+                    return "index";
+                }
+            } catch (Exception e) {
+                model.addAttribute("message", "写入数据库失败");
+                e.printStackTrace();
+            }
+        }
+        model.addAttribute("message", "验证码无效");
+        return "index";
+    }
 }
