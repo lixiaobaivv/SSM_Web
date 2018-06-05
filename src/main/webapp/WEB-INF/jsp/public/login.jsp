@@ -57,7 +57,7 @@
     <!-----start-copyright---->
     <div class="copy-right">
         <p>Template by <a
-                href="${pageContext.request.contextPath }/home">.技能树.</a></p>
+                href="${pageContext.request.contextPath }/">.技能树.</a></p>
     </div>
     <!-----//end-copyright---->
 </div>
