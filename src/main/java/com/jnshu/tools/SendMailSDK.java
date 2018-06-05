@@ -122,7 +122,7 @@ public class SendMailSDK {
             // 判断请求是否发送成功
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                 // 判断邮件是否发送成功
-                if ((Integer)jsonObject.get("statusCode") == 40005){
+                if ((Integer)jsonObject.get("statusCode") == 200){
                     // 发送成功将随机验证码存入缓存 5分钟后过期, 通过随机码取出对应用户数据
                     logger.debug("随机验证码:" + randInt);
 
