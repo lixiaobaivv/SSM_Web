@@ -51,6 +51,7 @@
                 <td>id</td>
                 <td>用户名称</td>
                 <td>邮箱</td>
+                <td>邮箱激活状态</td>
                 <td>手机号码</td>
                 <td>QQ</td>
                 <td>修真类型</td>
@@ -78,6 +79,8 @@
                            value="${findUserCustom.stuName}"></td>
                 <td><input name="studentCustom.stuMail"
                            value="${findUserCustom.stuMail}"></td>
+                <td><input name="studentCustom.stuMailState"
+                           value="${findUserCustom.stuMailState}"></td>
                 <td><input name="studentCustom.stuTelephone"
                            value="${findUserCustom.stuTelephone}"></td>
                 <td><input name="studentCustom.stuQq" type="number"
@@ -199,9 +202,11 @@
     <legend>用户列表</legend>
     <table width="100%" border=1>
         <tr>
+            <td>头像</td>
             <td>id</td>
             <td>用户名称</td>
             <td>邮箱</td>
+            <td>邮箱状态</td>
             <td>手机号码</td>
             <td>QQ</td>
             <td>修真类型</td>
@@ -224,9 +229,11 @@
         <%-- 调用modelAndView传过来的map,再找其中id为userList的--%>
         <c:forEach items="${userCustomList}" var="studentCustom">
             <tr>
+                <td><img src="${studentCustom.headurl}" width="50" height="50" onerror="this.src='${pageContext.request.contextPath }/static/images/687.png'"></td>
                 <td>${studentCustom.id}</td>
                 <td>${studentCustom.stuName }</td>
                 <td>${studentCustom.stuMail }</td>
+                <td>${studentCustom.stuMailState}</td>
                 <td>${studentCustom.stuTelephone }</td>
                 <td>${studentCustom.stuQq }</td>
                 <td>${studentCustom.stuProfession }</td>
