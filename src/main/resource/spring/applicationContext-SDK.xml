@@ -12,10 +12,17 @@
 
     <!-- SendCloudMail SDK -->
     <bean id="sendMailSDK" class="com.jnshu.tools.SendMailSDK">
-        <constructor-arg name="apiUser" value="" />
+        <constructor-arg name="apiUser" value=""/>
         <constructor-arg name="apiKey" value="" />
         <constructor-arg name="apiUrl" value="http://api.sendcloud.net/apiv2/mail/send" />
     </bean>
 
     <!-- 七牛云 SDK-->
+    <bean id="qiNiuSDK" class="com.jnshu.tools.UpdateImageSDK">
+        <constructor-arg name="ak" value="" />
+        <constructor-arg name="sk" value="" />
+        <constructor-arg name="bucketname" value=""/>
+        <!-- 存储时SDK提供的buck域名 -->
+        <constructor-arg name="fileUrl" value="" />
+    </bean>
 </beans>
