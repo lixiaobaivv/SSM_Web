@@ -4,13 +4,17 @@ import com.jnshu.model.StudentCustom;
 import com.jnshu.model.StudentQV;
 import com.jnshu.service.ServiceDao;
 import com.jnshu.tools.SendMailSDK;
+import com.jnshu.tools.UpdateImageSDK;
 import com.whalin.MemCached.MemCachedClient;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -33,9 +37,11 @@ public class ControllerProtect {
     ServiceDao serviceDao;
     @Autowired
     SendMailSDK sendMailSDK;
+    @Autowired
+    UpdateImageSDK updateImageSDK;
 
     // 搜索
-    @RequestMapping(value = "/students", method = {RequestMethod.GET,RequestMethod.POST,RequestMethod.PUT})
+    @RequestMapping(value = "/students", method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT})
     public String home(Model model, StudentQV studentQV) throws Exception {
         List<StudentCustom> studentCustomList = serviceDao.findListStudent(studentQV);
 
@@ -62,7 +68,7 @@ public class ControllerProtect {
         String username = "";
         for (Cookie c :
                 cookies) {
-            if (c.getName().equals("username")){
+            if (c.getName().equals("username")) {
                 username = URLDecoder.decode(c.getValue(), "UTF-8");
             }
         }
@@ -78,8 +84,8 @@ public class ControllerProtect {
         String username = "";
         for (Cookie c :
                 cookies) {
-            if (c.getName().equals("username")){
-                username = URLDecoder.decode(c.getValue(),"UTF-8");
+            if (c.getName().equals("username")) {
+                username = URLDecoder.decode(c.getValue(), "UTF-8");
             }
         }
         studentCustom.setCreate_by(username);
@@ -91,27 +97,70 @@ public class ControllerProtect {
     // 删除
     @RequestMapping(value = "/student/{id}", method = RequestMethod.DELETE)
     @ResponseBody
-    public Boolean delete(@PathVariable Integer id ) throws Exception {
+    public Boolean delete(@PathVariable Integer id) throws Exception {
         return serviceDao.deleteStudent(id);
     }
 
-    // 上传图片到七牛
-
-
     // 邮箱设置
-    @RequestMapping(value = "/sendMail", method = RequestMethod.GET)
+    @RequestMapping(value = "/sendMail", method = RequestMethod.POST)
     @ResponseBody
-    public Boolean sendMail(HttpServletRequest httpServletRequest, StudentCustom studentCustom){
-        String httpUrl = httpServletRequest.getRequestURL().toString();
+    public Boolean sendMail(HttpServletRequest httpServletRequest, StudentCustom studentCustom) {
+        // 获取项目路径
+        String httpUrl = httpServletRequest.getRequestURL().toString().split("/admin")[0] + "/verifyMail/";
         logger.debug("访问项目网址为: " + httpUrl);
-        studentCustom.setStuMail("xiaoweiba1028@gmail.com");
+        try {
+            // 如果该用户邮箱状态为激活状态 则替换失败
+            if (serviceDao.findStudentCustomById(studentCustom.getId()).getStuMailState() == 1){
+                logger.debug("邮箱已验证");
+                return false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.debug("用户id 查询失败");
+            return false;
+        }
         return sendMailSDK.sendMail(httpUrl, studentCustom);
     }
 
-    // 效验
-    @RequestMapping(value = "/sendMail/{verifyCode}", method = RequestMethod.GET)
+    // 短信效验
+    @RequestMapping(value = "/verifySMS", method = RequestMethod.POST)
     @ResponseBody
-    public String verifyCode(@PathVariable(value = "verifyCode") String verifyCode){
-        return verifyCode;
+    public Boolean verifySMS(Integer id, String verifyCode, HttpServletRequest httpServletRequest) {
+        logger.debug("传入验证码: " + verifyCode + " 用户id: " + id);
+        String telephone = (String) memCachedClient.get(verifyCode + httpServletRequest.getSession().getId());
+        logger.debug("telephone: " + telephone);
+        if (telephone != null) {
+            logger.debug("验证成功, 更新用户信息: " + telephone.toString());
+            try {
+                serviceDao.updateTelephone(id, telephone);
+                memCachedClient.delete("student" + id);
+                memCachedClient.delete("studentAll");
+                memCachedClient.delete(verifyCode + httpServletRequest.getSession().getId());
+                logger.debug("studentId  studentAll 验证码 缓存已清空");
+                return true;
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.debug("电话写入失败");
+            }
+        }
+        logger.debug("验证码错误");
+        return false;
+    }
+
+    // 上传图片到七牛
+    @RequestMapping(value = "/updateFile/{id}", method = RequestMethod.POST)
+    @ResponseBody
+    public boolean updaImage(HttpServletRequest httpServletRequest, @PathVariable(value = "id") Integer id) {
+        MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest) httpServletRequest;
+        MultipartFile file = multipartHttpServletRequest.getFile("item_pic");
+        logger.debug("上传图片名: " + file.getOriginalFilename().toString());
+        logger.debug("上传内容: " + file.getContentType().toString());
+        return updateImageSDK.updateFile(id, file);
+    }
+
+    @RequestMapping("/deleteFile")
+    @ResponseBody
+    public boolean deleteFile(String keyFile) {
+        return updateImageSDK.delete(keyFile);
     }
 }
