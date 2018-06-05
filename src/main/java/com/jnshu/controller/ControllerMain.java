@@ -16,8 +16,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -149,7 +147,7 @@ public class ControllerMain {
                 // 存入数据库 判断是否存入成功
                 if(serviceDao.updateEmail(studentCustom)){
                     model.addAttribute("message", "验证成功");
-                    return "index";
+                    return "message";
                 }
             } catch (Exception e) {
                 model.addAttribute("message", "写入数据库失败");
@@ -157,6 +155,6 @@ public class ControllerMain {
             }
         }
         model.addAttribute("message", "验证码无效");
-        return "index";
+        return "message";
     }
 }
