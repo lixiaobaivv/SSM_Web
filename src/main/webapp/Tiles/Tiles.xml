@@ -39,4 +39,10 @@
         <put-attribute name="title" expression="${title}" />
         <put-attribute name="body" expression="/WEB-INF/jsp/protect/${body}.jsp" />
     </definition>
+
+    <!-- 默认页面 -->
+    <definition name="message" template="/WEB-INF/jsp/tiles/templet/messageTemple.jsp">
+        <put-attribute name="body" value="/WEB-INF/jsp/public/message.jsp" />
+    </definition>
+
 </tiles-definitions>
