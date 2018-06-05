@@ -4,7 +4,7 @@ import com.jnshu.model.StudentCustom;
 import com.jnshu.model.StudentQV;
 import com.jnshu.service.ServiceDao;
 import com.jnshu.tools.SendMailSDK;
-import com.jnshu.tools.UpdateImageSDK;
+import com.jnshu.tools.QiniuyunOSSAPI;
 import com.whalin.MemCached.MemCachedClient;
 
 import org.slf4j.Logger;
@@ -38,7 +38,7 @@ public class ControllerProtect {
     @Autowired
     SendMailSDK sendMailSDK;
     @Autowired
-    UpdateImageSDK updateImageSDK;
+    QiniuyunOSSAPI updateFileAPI;
 
     // 搜索
     @RequestMapping(value = "/students", method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT})
@@ -155,12 +155,12 @@ public class ControllerProtect {
         MultipartFile file = multipartHttpServletRequest.getFile("item_pic");
         logger.debug("上传图片名: " + file.getOriginalFilename().toString());
         logger.debug("上传内容: " + file.getContentType().toString());
-        return updateImageSDK.updateFile(id, file);
+        return updateFileAPI.updateFile(id, file);
     }
 
     @RequestMapping("/deleteFile")
     @ResponseBody
     public boolean deleteFile(String keyFile) {
-        return updateImageSDK.delete(keyFile);
+        return updateFileAPI.delete(keyFile);
     }
 }
