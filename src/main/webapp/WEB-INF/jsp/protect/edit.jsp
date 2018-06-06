@@ -137,14 +137,14 @@
                 <td>操作</td>
             </tr>
             <tr>
-                <td><img src="${studentCustom.headurl}" width="50" height="50"
+                <td><img src="${studentCustom.headurl}-icon" width="50" height="50"
                          onerror="this.src='${pageContext.request.contextPath }/static/images/687.png'">
                 </td>
                 <td><input disabled value="${studentCustom.headurl}"></td>
                 <td>
                     <%-- 选择文件后在页面预览--%>
                     <img id="preview" width="50" height="50"
-                         src="${studentCustom.headurl}"
+                         src="${studentCustom.headurl}-icon"
                          onerror="this.src='${pageContext.request.contextPath }/static/images/687.png'"/>
                     <input type="file" name="item_pic" id="input_file"
                            accept="image/gif,image/jpeg,image/jpg,image/png,image/svg"
@@ -162,7 +162,7 @@
         // console.log($('#image'));
         formData.append("item_pic", $('#input_file').get(0).files[0]);
         $.ajax({
-            url: '/admin/updateFile/' + id,
+            url: '${pageContext.request.contextPath }/admin/updateFile/' + id,
             type: 'POST',
             data: formData,
             async: false,
