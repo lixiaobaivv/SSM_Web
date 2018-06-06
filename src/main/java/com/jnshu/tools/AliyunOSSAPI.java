@@ -33,7 +33,6 @@ public class AliyunOSSAPI {
     private String accessKeyId;
     private String accessKeySecret;
     private String endpoint;
-    String resultStr = null;
 
     private StudentCustom studentCustom;
 
@@ -55,6 +54,7 @@ public class AliyunOSSAPI {
             return new OSSClient(endpoint, accessKeyId, accessKeySecret);
         } catch (Exception e) {
             e.printStackTrace();
+            logger.debug("OSSClient 初始化认证失败");
             return null;
         }
     }
@@ -141,6 +141,7 @@ public class AliyunOSSAPI {
                                 logger.debug("写入数据库成功");
                                 return "上传成功";
                             }
+                            return "上传成功";
                         }
                     }
                     // 解析结果
