@@ -70,15 +70,17 @@ public class ControllerMain {
     @RequestMapping(value = "/validate", method = RequestMethod.POST)
     public String validate(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, UserAuth userAuth, String code) throws Exception {
         logger.debug("code: " + code);
-        // 判断code
-        if(memCachedClient.get(code + httpServletRequest.getSession().getId())==null){
+        // 判断短信 code 线上测试才注释的
+        /*if(memCachedClient.get(code + httpServletRequest.getSession().getId())==null){
             logger.debug("code 验证失败");
             return "redirect:/admin/login";
-        }
+        }*/
         String passWordMd5 = MD5Util.stringToMD5(userAuth.getAu_password());
         userAuth.setAu_password(passWordMd5);
         Integer userId = serviceDao.userAuth(userAuth);
         logger.debug("userId" + userId);
+        // 获取项目路径
+        String httpUrl = httpServletRequest.getRequestURL().toString().split("/validate")[0];
         if (userId != null) {
             logger.debug("验证通过");
             // token
@@ -89,12 +91,15 @@ public class ControllerMain {
             byte[] bytes = DESUtil.encrypt(token, key);
             Cookie cookie = new Cookie("token", Base64.encodeBase64String(bytes));
             cookie.setMaxAge(60 * 60 * 24 * 7);
-            cookie.setPath("/");
+
+            logger.debug(httpUrl);
+            // 上线以后cookie的生效范围为/, 但tomcat运行是带项目名的. 所以直接写/是有问题的. 这里取得项目路径再设置, 该token只再本项目生效
+            cookie.setPath(httpUrl);
 
             // 将用户信息保存在Cookie中
             Cookie cookie1 = new Cookie("username", URLEncoder.encode(userAuth.getAu_username(), "UTF-8"));
             cookie1.setMaxAge(60 * 60 * 24 * 7);
-            cookie1.setPath("/");
+            cookie1.setPath("httpUrl");
             httpServletResponse.addCookie(cookie);
             httpServletResponse.addCookie(cookie1);
 
@@ -120,7 +125,7 @@ public class ControllerMain {
         memCachedClient.delete(httpServletRequest.getSession().getId());
         // 删除session
         httpServletRequest.getSession().invalidate();
-        return "redirect:/home";
+        return "redirect:/";
     }
 
     // 短信验证
@@ -166,7 +171,7 @@ public class ControllerMain {
     }
 
     // OSS文件迁移
-    @RequestMapping(value = "/test", method = RequestMethod.GET)
+    @RequestMapping(value = "/fileRemoval", method = RequestMethod.GET)
     @ResponseBody
     public Boolean test(){
         return sdkTools.qiNiuFileToAliyun("image", "http://p9kpdscob.bkt.clouddn.com/");
