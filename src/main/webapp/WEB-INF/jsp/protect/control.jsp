@@ -31,7 +31,7 @@
     %>
     <%=URLDecoder.decode(username) %>
 
-    |<a href="${pageContext.request.contextPath }/logout">退出</a>
+    |<a href="${pageContext.request.contextPath }/logout">退出</a> | <a href="${pageContext.request.contextPath }/">返回首页</a>
     <hr>
 </c:if>
 
@@ -229,7 +229,7 @@
         <%-- 调用modelAndView传过来的map,再找其中id为userList的--%>
         <c:forEach items="${userCustomList}" var="studentCustom">
             <tr>
-                <td><img src="${studentCustom.headurl}" width="50" height="50" onerror="this.src='${pageContext.request.contextPath }/static/images/687.png'"></td>
+                <td><img src="${studentCustom.headurl}-icon" width="50" height="50" onerror="this.src='${pageContext.request.contextPath }/static/images/687.png'"></td>
                 <td>${studentCustom.id}</td>
                 <td>${studentCustom.stuName }</td>
                 <td>${studentCustom.stuMail }</td>
