@@ -24,6 +24,7 @@ public class SdkTools {
     AliyunOSSAPI aliyunOSSAPI;
 
     // 七牛文件转存阿里云
+    // prefixHttp 需要知道OSS文件外网地址的前缀
     public boolean qiNiuFileToAliyun(String bucketname, String prefixHttp) {
         return qiNiuFileToAliyunReal(bucketname, "", 1000, "", prefixHttp);
     }
