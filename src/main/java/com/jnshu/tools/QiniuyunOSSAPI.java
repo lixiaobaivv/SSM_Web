@@ -194,15 +194,18 @@ public class QiniuyunOSSAPI {
                         DefaultPutRet putRet = new Gson().fromJson(qresponse.bodyString(), DefaultPutRet.class);
                         logger.debug("上传结果: fileName: " + putRet.key + " hash: " + putRet.hash);
                         fileName = fileUrl + fileName;
-                        logger.debug("入库文件名: " + fileName);
-                        studentCustom = new StudentCustom();
-                        studentCustom.setHeadurl(fileName);
-                        studentCustom.setId(id);
-                        // 写入数据库
-                        if (serviceDao.updateStudent(studentCustom)) {
-                            logger.debug("写入数据库成功");
-                            return true;
+                        if(id != null){
+                            logger.debug("入库文件名: " + fileName);
+                            studentCustom = new StudentCustom();
+                            studentCustom.setHeadurl(fileName);
+                            studentCustom.setId(id);
+                            // 写入数据库
+                            if (serviceDao.updateStudent(studentCustom)) {
+                                logger.debug("写入数据库成功");
+                                return true;
+                            }
                         }
+                        return true;
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
