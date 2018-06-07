@@ -8,4 +8,5 @@ package com.jnshu.model;
  **/
 
 public class StudentCustom extends Student{
+    private static final long serialVersionUID = -4251121701835679064L;
 }

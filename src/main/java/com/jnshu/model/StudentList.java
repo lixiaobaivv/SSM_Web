@@ -11,8 +11,8 @@ import java.util.List;
  **/
 
 public class StudentList implements Serializable{
-    private static final Long serialVersionUID = -3213232132133232232L;
 
+    private static final long serialVersionUID = 4966283513683476159L;
     private List<StudentCustom> studentCustomList;
 
     public List<StudentCustom> getStudentList() {

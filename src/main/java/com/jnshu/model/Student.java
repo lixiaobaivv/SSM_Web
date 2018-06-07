@@ -11,7 +11,7 @@ import java.io.Serializable;
 
 public class Student implements Serializable {
     // 序列化后缓存
-    private static final long serialVersionUID = -4743372914435188122L;
+    private static final long serialVersionUID = 7935867480473067255L;
 
     private Integer id;
     private String stuName;

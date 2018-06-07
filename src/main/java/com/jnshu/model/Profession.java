@@ -10,7 +10,8 @@ import java.io.Serializable;
  **/
 
 public class Profession implements Serializable{
-    private static final long serialVersionUID = -4743372914435154232L;
+
+    private static final long serialVersionUID = 1957179448349542224L;
 
     private Integer id;
     private String proName;
