@@ -31,6 +31,7 @@ import java.util.List;
 @Controller
 public class ControllerMain {
     private static Logger logger = LoggerFactory.getLogger(ControllerMain.class);
+    private static String projectpath = null;
     @Autowired
     ServiceDao serviceDao;
     @Autowired
@@ -69,6 +70,8 @@ public class ControllerMain {
 
     @RequestMapping(value = "/validate", method = RequestMethod.POST)
     public String validate(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, UserAuth userAuth, String code) throws Exception {
+        // 获取项目路径
+        this.projectpath = httpServletRequest.getContextPath();
         logger.debug("code: " + code);
         // 判断短信 code 线上测试才注释的
         /*if(memCachedClient.get(code + httpServletRequest.getSession().getId())==null){
@@ -79,8 +82,6 @@ public class ControllerMain {
         userAuth.setAu_password(passWordMd5);
         Integer userId = serviceDao.userAuth(userAuth);
         logger.debug("userId" + userId);
-        // 获取项目路径
-        String httpUrl = httpServletRequest.getRequestURL().toString().split("/validate")[0];
         if (userId != null) {
             logger.debug("验证通过");
             // token
@@ -92,14 +93,15 @@ public class ControllerMain {
             Cookie cookie = new Cookie("token", Base64.encodeBase64String(bytes));
             cookie.setMaxAge(60 * 60 * 24 * 7);
 
-            logger.debug(httpUrl);
+            logger.debug(projectpath);
             // 上线以后cookie的生效范围为/, 但tomcat运行是带项目名的. 所以直接写/是有问题的. 这里取得项目路径再设置, 该token只再本项目生效
-            cookie.setPath(httpUrl);
+            cookie.setPath(projectpath);
 
+            logger.debug("登陆时token Cookie路径: " + cookie.getPath());
             // 将用户信息保存在Cookie中
             Cookie cookie1 = new Cookie("username", URLEncoder.encode(userAuth.getAu_username(), "UTF-8"));
             cookie1.setMaxAge(60 * 60 * 24 * 7);
-            cookie1.setPath("httpUrl");
+            cookie1.setPath(projectpath);
             httpServletResponse.addCookie(cookie);
             httpServletResponse.addCookie(cookie1);
 
@@ -112,15 +114,25 @@ public class ControllerMain {
 
     @RequestMapping(value = "/logout", method = RequestMethod.GET)
     public String logout(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
-        Cookie[] cookies = httpServletRequest.getCookies();
+        /*Cookie[] cookies = httpServletRequest.getCookies();
         if (cookies != null) {
             for (Cookie c : cookies) {
                 if(c.getName().equals("token")){
                     c.setMaxAge(0);
+                    c.setPath(httpServletRequest.getContextPath());
+                    logger.debug("退出时token Cookie路径: " + c.getPath());
                     httpServletResponse.addCookie(c);
                 }
             }
-        }
+        }*/
+
+        // logger.debug("全局项目路径: " + projectpath);
+        // // 新建一个Cookie覆盖掉原来的Token 省去查找Cookie的开销
+        Cookie cleanCookie = new Cookie("token", null);
+        cleanCookie.setPath(projectpath);
+        cleanCookie.setMaxAge(0);
+        httpServletResponse.addCookie(cleanCookie);
+
         // 删除Session 缓存
         memCachedClient.delete(httpServletRequest.getSession().getId());
         // 删除session
