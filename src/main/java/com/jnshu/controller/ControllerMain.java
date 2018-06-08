@@ -1,13 +1,16 @@
 package com.jnshu.controller;
 
 import com.jnshu.model.*;
+import com.jnshu.service.ServiceCache;
 import com.jnshu.service.ServiceDao;
+import com.jnshu.service.ServiceOSS;
+import com.jnshu.service.ServiceSMS;
 import com.jnshu.tools.*;
-import com.whalin.MemCached.MemCachedClient;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,18 +35,22 @@ import java.util.List;
 public class ControllerMain {
     private static Logger logger = LoggerFactory.getLogger(ControllerMain.class);
     private static String projectpath = null;
+
+    @Qualifier("serverDao")
     @Autowired
     ServiceDao serviceDao;
-    @Autowired
-    MemCachedClient memCachedClient;
-    @Autowired
-    SendSMSSDK rlSMS;
-    @Autowired
-    QiniuyunOSSAPI updateFileAPI;
-    @Autowired
-    SdkTools sdkTools;
 
-    // private String codeValidate;
+    @Qualifier("serverCachedMem")
+    @Autowired
+    ServiceCache serviceCache;
+
+    @Qualifier("serverSMSRLian")
+    @Autowired
+    ServiceSMS serviceSMS;
+
+    @Qualifier("serverQiNiuYunOSS")
+    @Autowired
+    ServiceOSS serviceOSS;
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String home(Model model, StudentQV studentQV) throws Exception {
@@ -74,7 +81,7 @@ public class ControllerMain {
         this.projectpath = httpServletRequest.getContextPath();
         logger.debug("code: " + code);
         // 判断短信 code 线上测试才注释的
-        /*if(memCachedClient.get(code + httpServletRequest.getSession().getId())==null){
+        /*if(serviceCache.get(code + httpServletRequest.getSession().getId())==null){
             logger.debug("code 验证失败");
             return "redirect:/admin/login";
         }*/
@@ -106,7 +113,7 @@ public class ControllerMain {
             httpServletResponse.addCookie(cookie1);
 
             // 将Session保存到缓存中
-            memCachedClient.set(httpServletRequest.getSession().getId(), "session_id");
+            serviceCache.set(httpServletRequest.getSession().getId(), "session_id");
             return "redirect:/admin/students";
         }
         return "redirect:/admin/login";
@@ -134,7 +141,7 @@ public class ControllerMain {
         httpServletResponse.addCookie(cleanCookie);
 
         // 删除Session 缓存
-        memCachedClient.delete(httpServletRequest.getSession().getId());
+        serviceCache.delete(httpServletRequest.getSession().getId());
         // 删除session
         httpServletRequest.getSession().invalidate();
         return "redirect:/";
@@ -146,12 +153,12 @@ public class ControllerMain {
     public Boolean SMS(String telePhone, HttpServletRequest httpServletRequest){
         boolean flag = false;
         // 判断是否在60秒内发送过短信
-        if(memCachedClient.get(telePhone)==null){
+        if(serviceCache.get(telePhone)==null){
             String Session = httpServletRequest.getSession().getId();
-            flag = rlSMS.testSMS(telePhone, Session);
+            flag = serviceSMS.sendSMS(telePhone, Session);
             if (flag){
                 // 短信发送成功设置60秒缓存
-                memCachedClient.set(telePhone, "ver", new Date(1000*60));
+                serviceCache.set(telePhone, "ver", new Date(1000*60));
             }
         }
         return flag;
@@ -160,11 +167,11 @@ public class ControllerMain {
     // 效验 效验邮箱不需要登陆验证
     @RequestMapping(value = "/verifyMail/{verifyCode}", method = RequestMethod.GET)
     public String verifyCode(@PathVariable(value = "verifyCode") String verifyCode, Model model){
-        StudentCustom studentCustom = (StudentCustom) memCachedClient.get(verifyCode);
+        StudentCustom studentCustom = (StudentCustom) serviceCache.get(verifyCode);
         if (studentCustom != null ){
             logger.debug("studentCustom 邮箱验证:" + studentCustom.toString());
             // 该验证码请求只要被接收到就失效
-            memCachedClient.delete(verifyCode);
+            serviceCache.delete(verifyCode);
             // 改变邮箱状态
             studentCustom.setStuMailState(1);
             try {
@@ -186,6 +193,6 @@ public class ControllerMain {
     @RequestMapping(value = "/fileRemoval", method = RequestMethod.GET)
     @ResponseBody
     public Boolean test(){
-        return sdkTools.qiNiuFileToAliyun("image", "http://p9kpdscob.bkt.clouddn.com/");
+        return serviceOSS.fileRemoval("image", "http://p9kpdscob.bkt.clouddn.com/");
     }
 }

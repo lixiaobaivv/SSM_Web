@@ -1,5 +1,7 @@
 package com.jnshu.model;
 
+import java.io.Serializable;
+
 /**
  * @program: smsdemo
  * @description: 用户认证
@@ -7,7 +9,8 @@ package com.jnshu.model;
  * @create: 2018-05-29 23:06
  **/
 
-public class UserAuth {
+public class UserAuth implements Serializable{
+    private static final long serialVersionUID = 8546758869773596190L;
     private Integer id;
     private String au_username;
     private String au_password;

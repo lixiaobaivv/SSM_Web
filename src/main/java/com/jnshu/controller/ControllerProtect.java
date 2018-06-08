@@ -2,14 +2,15 @@ package com.jnshu.controller;
 
 import com.jnshu.model.StudentCustom;
 import com.jnshu.model.StudentQV;
+import com.jnshu.service.ServiceCache;
 import com.jnshu.service.ServiceDao;
-import com.jnshu.tools.SendMailSDK;
-import com.jnshu.tools.QiniuyunOSSAPI;
-import com.whalin.MemCached.MemCachedClient;
+import com.jnshu.service.ServiceMail;
+import com.jnshu.service.ServiceOSS;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -31,14 +32,21 @@ import java.util.List;
 @RequestMapping("/admin")
 public class ControllerProtect {
     private static Logger logger = LoggerFactory.getLogger(ControllerProtect.class);
+    @Qualifier("serverCachedMem")
     @Autowired
-    MemCachedClient memCachedClient;
+    ServiceCache serviceCache;
+
+    @Qualifier("serverDao")
     @Autowired
     ServiceDao serviceDao;
+
+    @Qualifier("serverMailSendCloud")
     @Autowired
-    SendMailSDK sendMailSDK;
+    ServiceMail sendMailSDK;
+
+    @Qualifier("serverQiNiuYunOSS")
     @Autowired
-    QiniuyunOSSAPI updateFileAPI;
+    ServiceOSS serviceOSS;
 
     // 搜索
     @RequestMapping(value = "/students", method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT})
@@ -127,15 +135,15 @@ public class ControllerProtect {
     @ResponseBody
     public Boolean verifySMS(Integer id, String verifyCode, HttpServletRequest httpServletRequest) {
         logger.debug("传入验证码: " + verifyCode + " 用户id: " + id);
-        String telephone = (String) memCachedClient.get(verifyCode + httpServletRequest.getSession().getId());
+        String telephone = (String) serviceCache.get(verifyCode + httpServletRequest.getSession().getId());
         logger.debug("telephone: " + telephone);
         if (telephone != null) {
             logger.debug("验证成功, 更新用户信息: " + telephone.toString());
             try {
                 serviceDao.updateTelephone(id, telephone);
-                memCachedClient.delete("student" + id);
-                memCachedClient.delete("studentAll");
-                memCachedClient.delete(verifyCode + httpServletRequest.getSession().getId());
+                serviceCache.delete("student" + id);
+                serviceCache.delete("studentAll");
+                serviceCache.delete(verifyCode + httpServletRequest.getSession().getId());
                 logger.debug("studentId  studentAll 验证码 缓存已清空");
                 return true;
             } catch (Exception e) {
@@ -155,12 +163,12 @@ public class ControllerProtect {
         MultipartFile file = multipartHttpServletRequest.getFile("item_pic");
         logger.debug("上传图片名: " + file.getOriginalFilename().toString());
         logger.debug("上传内容: " + file.getContentType().toString());
-        return updateFileAPI.updateFile(id, file);
+        return serviceOSS.updateFile(id, file);
     }
 
     @RequestMapping("/deleteFile")
     @ResponseBody
     public boolean deleteFile(String keyFile) {
-        return updateFileAPI.delete(keyFile);
+        return serviceOSS.deleteFile(keyFile);
     }
 }

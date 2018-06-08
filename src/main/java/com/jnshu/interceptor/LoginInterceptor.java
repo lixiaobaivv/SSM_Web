@@ -1,12 +1,13 @@
 package com.jnshu.interceptor;
 
+import com.jnshu.service.ServiceCache;
 import com.jnshu.service.ServiceDao;
 import com.jnshu.tools.DESUtil;
-import com.whalin.MemCached.MemCachedClient;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -24,8 +25,11 @@ import java.net.URLDecoder;
 
 public class LoginInterceptor implements HandlerInterceptor {
     private static Logger logger = LoggerFactory.getLogger(LoginInterceptor.class);
+    @Qualifier("serverCachedMem")
     @Autowired
-    MemCachedClient memCachedClient;
+    ServiceCache serviceCache;
+
+    @Qualifier("serverDao")
     @Autowired
     ServiceDao serviceDao;
 
@@ -33,7 +37,7 @@ public class LoginInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o) throws Exception {
         // 判断session_id是否存在
         String session_id = httpServletRequest.getSession().getId();
-        if (memCachedClient.get(session_id) != null) {
+        if (serviceCache.get(session_id) != null) {
             logger.debug("session验证成功");
             return true;
         }
@@ -51,7 +55,7 @@ public class LoginInterceptor implements HandlerInterceptor {
                     // 获取id并验证
                     if(serviceDao.findUserAuthByid(Integer.valueOf(Token.split("=")[0]))){
                         // 保存到缓存
-                        memCachedClient.set(session_id, "session_id");
+                        serviceCache.set(session_id, "session_id");
                         logger.debug("Cookie验证成功");
                         return true;
                     }

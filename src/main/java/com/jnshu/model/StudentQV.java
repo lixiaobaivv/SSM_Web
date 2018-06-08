@@ -1,5 +1,7 @@
 package com.jnshu.model;
 
+import java.io.Serializable;
+
 /**
  * @program: smsdemo
  * @description: 综合类
@@ -7,7 +9,8 @@ package com.jnshu.model;
  * @create: 2018-05-29 23:16
  **/
 
-public class StudentQV {
+public class StudentQV implements Serializable{
+    private static final long serialVersionUID = -2830902165464284179L;
     private Student student;
     private StudentCustom studentCustom;
 
