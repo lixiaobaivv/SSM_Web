@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <!-- 数据层 -->
+    <bean id="serverDao" class="org.springframework.remoting.rmi.RmiProxyFactoryBean">
+        <property name="serviceUrl" value="rmi://localhost:9090/ServerDao"/>
+        <property name="serviceInterface" value="com.jnshu.service.ServiceDao"/>
+    </bean>
+
+    <!-- OSS 阿里云 -->
+    <bean id="serverALiYunOSS" class="org.springframework.remoting.rmi.RmiProxyFactoryBean">
+        <property name="serviceUrl" value="rmi://localhost:9090/ServerQiNiuYunOSS" />
+        <property name="serviceInterface" value="com.jnshu.service.ServiceOSS" />
+    </bean>
+    <!-- OSS 七牛云 -->
+    <bean id="serverQiNiuYunOSS" class="org.springframework.remoting.rmi.RmiProxyFactoryBean">
+        <property name="serviceUrl" value="rmi://localhost:9090/ServerQiNiuYunOSS" />
+        <property name="serviceInterface" value="com.jnshu.service.ServiceOSS" />
+    </bean>
+    <!-- Mail SendCloudMail -->
+    <bean id="serverMailSendCloud" class="org.springframework.remoting.rmi.RmiProxyFactoryBean">
+        <property name="serviceUrl" value="rmi://localhost:9090/ServerMailSendCloud" />
+        <property name="serviceInterface" value="com.jnshu.service.ServiceMail" />
+    </bean>
+    <!-- SMS 容联短信 -->
+    <bean id="serverSMSRLian" class="org.springframework.remoting.rmi.RmiProxyFactoryBean">
+        <property name="serviceUrl" value="rmi://localhost:9090/ServerSMSRLian" />
+        <property name="serviceInterface" value="com.jnshu.service.ServiceSMS" />
+    </bean>
+
+    <!-- 缓存 MemCached -->
+    <bean id="serverCachedMem" class="org.springframework.remoting.rmi.RmiProxyFactoryBean">
+        <property name="serviceUrl" value="rmi://localhost:9090/ServerCachedMem" />
+        <property name="serviceInterface" value="com.jnshu.service.ServiceCache" />
+    </bean>
+</beans>
