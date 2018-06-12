@@ -165,7 +165,7 @@ public class ControllerProtect {
         MultipartFile file = multipartHttpServletRequest.getFile("item_pic");
         logger.debug("上传图片名: " + file.getOriginalFilename().toString());
         logger.debug("上传内容: " + file.getContentType().toString());
-        // 注意 这里上传MultipartFile文件的话传递的时缓存文件在项目环境中的路径, 并不是实际文件, 当使用RMI后必须使用文件流方式传输.
+        // 注意 这里如果上传MultipartFile文件的话传递的是缓存文件在项目环境中的路径, 并不是实际文件, 当使用RMI后必须使用文件流方式传输.
         byte[] buf = file.getBytes();
         String fileName = MD5Util.getMultipartFileMd5(file);
 
