@@ -165,7 +165,7 @@
             url: '${pageContext.request.contextPath }/admin/updateFile/' + id,
             type: 'POST',
             data: formData,
-            async: false,
+            async: true,
             cache: false,
             contentType: false,
             processData: false,
@@ -214,7 +214,7 @@
             type: "POST",
             url: url,
             data: $('#' + id).serialize(),// 你的formid
-            async: false,
+            async: true,
             error: function (request) {
                 alert("请求错误: " + request.error);
             },
