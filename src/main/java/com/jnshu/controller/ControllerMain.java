@@ -34,23 +34,24 @@ import java.util.List;
 @Controller
 public class ControllerMain {
     private static Logger logger = LoggerFactory.getLogger(ControllerMain.class);
+    // 项目路径
     private static String projectpath = null;
 
     @Qualifier("serverDao")
     @Autowired
-    ServiceDao serviceDao;
+    private ServiceDao serviceDao;
 
     @Qualifier("serverCachedMem")
     @Autowired
-    ServiceCache serviceCache;
+    private ServiceCache serviceCache;
 
     @Qualifier("serverSMSRLian")
     @Autowired
-    ServiceSMS serviceSMS;
+    private ServiceSMS serviceSMS;
 
     @Qualifier("serverQiNiuYunOSS")
     @Autowired
-    ServiceOSS serviceOSS;
+    private ServiceOSS serviceOSS;
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String home(Model model, StudentQV studentQV) throws Exception {
