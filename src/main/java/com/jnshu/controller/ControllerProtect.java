@@ -7,6 +7,7 @@ import com.jnshu.service.ServiceDao;
 import com.jnshu.service.ServiceMail;
 import com.jnshu.service.ServiceOSS;
 
+import com.jnshu.tools.MD5Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.List;
 
@@ -34,19 +36,19 @@ public class ControllerProtect {
     private static Logger logger = LoggerFactory.getLogger(ControllerProtect.class);
     @Qualifier("serverCachedMem")
     @Autowired
-    ServiceCache serviceCache;
+    private ServiceCache serviceCache;
 
     @Qualifier("serverDao")
     @Autowired
-    ServiceDao serviceDao;
+    private ServiceDao serviceDao;
 
     @Qualifier("serverMailSendCloud")
     @Autowired
-    ServiceMail sendMailSDK;
+    private ServiceMail sendMailSDK;
 
     @Qualifier("serverQiNiuYunOSS")
     @Autowired
-    ServiceOSS serviceOSS;
+    private ServiceOSS serviceOSS;
 
     // 搜索
     @RequestMapping(value = "/students", method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT})
@@ -158,12 +160,17 @@ public class ControllerProtect {
     // 上传图片到七牛
     @RequestMapping(value = "/updateFile/{id}", method = RequestMethod.POST)
     @ResponseBody
-    public boolean updaImage(HttpServletRequest httpServletRequest, @PathVariable(value = "id") Integer id) {
+    public boolean updaImage(HttpServletRequest httpServletRequest, @PathVariable(value = "id") Integer id) throws IOException {
         MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest) httpServletRequest;
         MultipartFile file = multipartHttpServletRequest.getFile("item_pic");
         logger.debug("上传图片名: " + file.getOriginalFilename().toString());
         logger.debug("上传内容: " + file.getContentType().toString());
-        return serviceOSS.updateFile(id, file);
+        // 注意 这里上传MultipartFile文件的话传递的时缓存文件在项目环境中的路径, 并不是实际文件, 当使用RMI后必须使用文件流方式传输.
+        byte[] buf = file.getBytes();
+        String fileName = MD5Util.getMultipartFileMd5(file);
+
+        // logger.debug(bytes.toString());
+        return serviceOSS.updateFile(id, buf, fileName, file.getContentType());
     }
 
     @RequestMapping("/deleteFile")
