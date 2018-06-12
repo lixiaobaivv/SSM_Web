@@ -271,10 +271,10 @@
             success: function (result) {
                 //判断result结果
                 if (result) {
-                    alert("id: " + id + "删除成功,即将返回列表页")
+                    alert("id: " + id + "删除成功,即将返回列表页");
                     window.location.reload();
                 } else {
-                    alert("id: " + id + " 删除失败")
+                    alert("id: " + id + " 删除失败");
                 }
             }
         });
