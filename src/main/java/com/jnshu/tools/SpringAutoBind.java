@@ -31,7 +31,7 @@ public class SpringAutoBind implements Converter<String, Long> {
                 // 然后使用getTime()获取Long类型的微秒数
                 // 最后除以1000得到秒为单位的long类型数
                 // logger.info("String转为data后为:" + simpleDateFormat.parse(source));
-                Long so = simpleDateFormat.parse(source).getTime() / 1000;
+                Long so = simpleDateFormat.parse(source).getTime();
                 return so;
             } catch (ParseException e) {
                 e.printStackTrace();
