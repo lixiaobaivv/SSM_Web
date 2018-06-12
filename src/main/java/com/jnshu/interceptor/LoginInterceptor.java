@@ -27,11 +27,11 @@ public class LoginInterceptor implements HandlerInterceptor {
     private static Logger logger = LoggerFactory.getLogger(LoginInterceptor.class);
     @Qualifier("serverCachedMem")
     @Autowired
-    ServiceCache serviceCache;
+    private ServiceCache serviceCache;
 
     @Qualifier("serverDao")
     @Autowired
-    ServiceDao serviceDao;
+    private ServiceDao serviceDao;
 
     @Override
     public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o) throws Exception {
