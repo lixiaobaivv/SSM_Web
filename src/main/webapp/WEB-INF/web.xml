@@ -79,7 +79,7 @@ Log4jConfigListener必须要在Spring的Listener之前 -->
     <jsp-config>
         <taglib>
             <taglib-uri>/tags</taglib-uri>
-            <taglib-location>/tld/DataTag.tld</taglib-location>
+            <taglib-location>/tld/DateTag.tld</taglib-location>
         </taglib>
     </jsp-config>
 
