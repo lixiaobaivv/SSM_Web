@@ -8,6 +8,7 @@ public interface ServiceOSS {
     // 上传
     Boolean updateFile(Integer id, MultipartFile multipartFile);
     Boolean updateFile(Integer id, InputStream fi, String fileName, String fileType);
+    Boolean updateFile(Integer id, byte[] bytes, String fileName, String fileType);
 
     // 删除
     Boolean deleteFile(String keyFile);
